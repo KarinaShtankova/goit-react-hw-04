@@ -1,4 +1,5 @@
-import css from "./SearchBar.module.css";
+import css from './SearchBar.module.css';
+import { IoSearchSharp } from 'react-icons/io5';
 
 export default function SearchBar({ onSubmit }) {
   return (
@@ -12,7 +13,9 @@ export default function SearchBar({ onSubmit }) {
           autoFocus
           placeholder="Search images and photos"
         />
-        <button type="submit">Search</button>
+        <button className={css.btn} type="submit">
+          <IoSearchSharp size={'22px'} />
+        </button>
       </form>
     </header>
   );

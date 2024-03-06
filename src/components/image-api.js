@@ -10,13 +10,16 @@ export const fetchImages = async (searchQuery, page) => {
       query: searchQuery,
       per_page: 12,
       page: page,
+      orientation: 'landscape',
       client_id: ACCESS_KEY,
-      
     },
   });
   if (!response.data.total) {
-       toast.error('No images found for this query.');
+    toast.error('No images found for this query.');
   }
 
-  return response.data.results;
+  return {
+    data: response.data.results,
+    totalPages: response.data.total_pages,
+  };
 };

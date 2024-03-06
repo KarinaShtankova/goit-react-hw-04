@@ -1,24 +1,14 @@
 import css from './App.module.css';
 import toast, { Toaster } from 'react-hot-toast';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import SearchBar from './SearchBar/SearchBar';
 import { fetchImages } from './image-api';
 import ImageGallery from './ImageGallery/ImageGallery';
 import LoadMoreBtn from './LoadMoreBtn/LoadMoreBtn';
 import Loader from './Loader/Loader';
 import ErrorMessage from './ErrorMessage/ErrorMessage';
-import ImageModal from 'react-modal';
-
-const customStyles = {
-  content: {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '-50%',
-    transform: 'translate(-50%, -50%)',
-  },
-};
+import Modal from 'react-modal';
+import ImageModal from './ImageModal/ImageModal';
 
 export default function App() {
   const [images, setImages] = useState([]);
@@ -27,13 +17,17 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
   const [modalIsOpen, setIsOpen] = useState(false);
-  const [selectedImgUrl, setSelectedImgUrl] = useState('');
+  const [selectedImg, setSelectedImg] = useState({});
+  const [showBtn, setShowBtn] = useState(false);
 
-  // const imgRef = useRef();
+  const galleryRef = useRef();
+  Modal.setAppElement('#root');
 
   useEffect(() => {
-ImageModal.setAppElement('#root');
+    handleScroll();
+  }, [images]);
 
+  useEffect(() => {
     if (query.trim() === '') {
       return;
     }
@@ -41,11 +35,12 @@ ImageModal.setAppElement('#root');
       try {
         setIsLoading(true);
         setError(false);
-        const data = await fetchImages(query, page);
+        const { data, totalPages } = await fetchImages(query, page);
 
         setImages(prevImages => {
           return [...prevImages, ...data];
         });
+        setShowBtn(totalPages && totalPages !== page);
       } catch (e) {
         setError(true);
       } finally {
@@ -54,6 +49,23 @@ ImageModal.setAppElement('#root');
     }
     getData();
   }, [page, query]);
+
+  const handleScroll = () => {
+    if (!galleryRef.current) {
+      return;
+    }
+
+    if (page > 1) {
+      const dims = galleryRef.current.getBoundingClientRect();
+      const y = dims.height * 3;
+
+      window.scrollTo({
+        top: y,
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
 
   const handleSearch = e => {
     e.preventDefault();
@@ -73,60 +85,40 @@ ImageModal.setAppElement('#root');
     setPage(page + 1);
   };
 
-  const openModal =(data) => {
+  const openModal = data => {
     setIsOpen(true);
-    setSelectedImgUrl(data.urls.regular);
-    // console.log(data);
-    
-  }
+    setSelectedImg(data);
+  };
 
   const closeModal = () => {
     setIsOpen(false);
-      setSelectedImgUrl('');
-  }
-  
+  };
 
   return (
     <div className={css.container}>
       <SearchBar onSubmit={handleSearch} />
       {images.length > 0 && (
         <ImageGallery
-          // ref={imgRef}
+          ref={galleryRef}
           handleClick={openModal}
           images={images}
         />
       )}
       {isLoading && <Loader />}
       {error && <ErrorMessage />}
-      {images.length > 0 && !isLoading && (
-        <LoadMoreBtn onLoadMoreBtn={handleLoadMore} />
-      )}
+      {showBtn && <LoadMoreBtn onLoadMoreBtn={handleLoadMore} />}
 
-      <ImageModal
+      <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
-        style={customStyles}
         className={css.Modal}
         overlayClassName={css.Overlay}
         contentLabel="Example Modal"
       >
-        {/* <h2 ref={_subtitle => (subtitle = _subtitle)}>Hello</h2> */}
-        <button onClick={closeModal}>close</button>
-        <div>
-          <img className={css.img} src={selectedImgUrl} />
-        </div>
-        <form>
-          <input />
-          <button>tab navigation</button>
-          <button>stays</button>
-          <button>inside</button>
-          <button>the modal</button>
-        </form>
-      </ImageModal>
+        <ImageModal imageData={selectedImg} />
+      </Modal>
 
       <Toaster position="top-right" />
     </div>
   );
 }
-
-
