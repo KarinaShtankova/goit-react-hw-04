@@ -1,0 +1,24 @@
+.header {
+  position: sticky;
+  right: 0;
+  top: 0;
+  z-index: 1;
+  background-color: #3f51b5;
+  box-shadow: 0 0 0.2rem rgba(0, 0, 0, 0.1), 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
+}
+
+.searchBar {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+}
+
+.input {
+  /* display: block; */
+  padding: 8px 32px;
+  width: 640px;
+  border: none;
+  border-radius: 4px;
+  /* margin-left: auto;
+    margin-right: auto; */
+}
