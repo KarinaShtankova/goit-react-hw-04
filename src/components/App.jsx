@@ -21,7 +21,10 @@ export default function App() {
   const [showBtn, setShowBtn] = useState(false);
 
   const galleryRef = useRef();
-  Modal.setAppElement('#root');
+
+  useEffect(() => {
+    Modal.setAppElement('#root');
+  }, []);
 
   useEffect(() => {
     handleScroll();
@@ -40,9 +43,11 @@ export default function App() {
         setImages(prevImages => {
           return [...prevImages, ...data];
         });
+        console.log(totalPages);
         setShowBtn(totalPages && totalPages !== page);
       } catch (e) {
         setError(true);
+        setShowBtn(false);
       } finally {
         setIsLoading(false);
       }
@@ -73,12 +78,13 @@ export default function App() {
     const form = e.target;
     const search = form.elements.search.value;
     setQuery(search);
-    if (search.trim() === '') {
-      toast.error('Enter text to search for images.');
-    }
     form.reset();
     setPage(1);
     setImages([]);
+    if (search.trim() === '') {
+      toast.error('Enter text to search for images.');
+      setShowBtn(false);
+    }
   };
 
   const handleLoadMore = () => {
@@ -107,16 +113,13 @@ export default function App() {
       {isLoading && <Loader />}
       {error && <ErrorMessage />}
       {showBtn && <LoadMoreBtn onLoadMoreBtn={handleLoadMore} />}
-
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={closeModal}
-        className={css.Modal}
-        overlayClassName={css.Overlay}
-        contentLabel="Example Modal"
-      >
-        <ImageModal imageData={selectedImg} />
-      </Modal>
+      {selectedImg.urls && (
+        <ImageModal
+          imageData={selectedImg}
+          isOpen={modalIsOpen}
+          onRequestClose={closeModal}
+        />
+      )}
 
       <Toaster position="top-right" />
     </div>
