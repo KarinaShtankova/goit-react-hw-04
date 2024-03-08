@@ -43,7 +43,6 @@ export default function App() {
         setImages(prevImages => {
           return [...prevImages, ...data];
         });
-        console.log(totalPages);
         setShowBtn(totalPages && totalPages !== page);
       } catch (e) {
         setError(true);
