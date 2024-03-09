@@ -1,5 +1,5 @@
 import css from './App.module.css';
-import toast, { Toaster } from 'react-hot-toast';
+import  { Toaster } from 'react-hot-toast';
 import { useState, useEffect, useRef } from 'react';
 import SearchBar from './SearchBar/SearchBar';
 import { fetchImages } from './image-api';
@@ -71,17 +71,11 @@ export default function App() {
     }
   };
 
-  const handleSearch = e => {
-    e.preventDefault();
-
-    const form = e.target;
-    const search = form.elements.search.value;
-    setQuery(search);
-    form.reset();
+  const handleSearch = value => {
+    setQuery(value);
     setPage(1);
     setImages([]);
-    if (search.trim() === '') {
-      toast.error('Enter text to search for images.');
+    if (value.trim() === '') {
       setShowBtn(false);
     }
   };
